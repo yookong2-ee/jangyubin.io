@@ -1,52 +1,25 @@
-# master-deploy-work.yml
-name: main
+# 1 워크플로의 이름 지정
+name: CI
 
+# 2 워크플로가 시작될 조건 지정
 on:
   push:
-    branches:
-      - main # main 브랜치에서 push 이벤트가 일어났을 때 실행
-  pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # 3 실행 환경 지정
+    #4 실행스텝지정
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@main
+      - uses: actions/checkout@v3
 
-      - name: Generate Environment Variables File for Production # Github Repository Secrets를 통해 변수 파일을 생성
-        run: |
-          echo "REACT_APP_AUTH_SERVER=$REACT_APP_AUTH_SERVER" >> .env.production
-          echo "REACT_APP_API_SERVER=$REACT_APP_API_SERVER" >> .env.production
-
-        env:
-          REACT_APP_AUTH_SERVER: ${{ secrets.REACT_APP_AUTH_SERVER }}
-          REACT_APP_API_SERVER: ${{ secrets.REACT_APP_API_SERVER }}
-
-      # 실행 속도를 빠르게 하기 위해 설치된 Node 모듈을 캐시하도록 설정합니다.
-      - name: Cache node modules
-        uses: actions/cache@v2
+      - uses: actions/setup-java@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install Dependencies
-        run: yarn
+          distribution: 'zulu'
+          java-version: '17'
 
-      - name: Build
-        run: yarn build
-        env:
-          CI: ""
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          aws s3 cp \
-          --recursive \
-          --region ap-northeast-2 \
-          build s3://admin.pops.show
+      - name: Build with Gradle
+        run: ./gradlew clean build
