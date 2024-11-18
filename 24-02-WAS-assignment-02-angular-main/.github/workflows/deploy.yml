@@ -1,0 +1,28 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 푸시될 때 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3  # 저장소 코드를 가져옴
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v2  # Hugo 설치
+      with:
+        hugo-version: 'latest'
+
+    - name: Build website
+      run: hugo  # Hugo로 사이트 빌드
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3  # GitHub Pages에 배포
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
