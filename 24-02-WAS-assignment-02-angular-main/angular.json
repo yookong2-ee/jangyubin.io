@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/angular-demo",
+            "outputPath": "dist/24-02-WAS-assignment-02-angular-main",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
